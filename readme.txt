@@ -1,8 +1,8 @@
+Python version:
+   Python 3.5
 
-Requirements:
-Python 3.5
-nltk 3.0
-
+Requirements are specified in requirements.txt. To install them:
+   pip3.5 install -r requirements.txt
 
 bookmarks/reading:
 
