@@ -1,6 +1,6 @@
-Python version:
+Install/setup:
 
-Python 3.4 (the latest version that exists on Patas)
+Python version: Python 3.4 (the latest version that exists on Patas)
 
 This means any Python scripts you run should be executed with "python3.4",
 as just typing "python" will get you Python 2.x.
@@ -24,6 +24,22 @@ this process yourself:
 This starts an interactive download tool.
 Choose download ("d"), and when prompted, enter "punkt".
 After install, exit from the NLTK downloader/Python.
+
+===
+
+Data generation:
+
+There is a script that creates train/test/dev files for each of our supported languages.
+This script is src/generate_data.py.
+This script will create (if needed) a subfolder called /src/data and generate into it 12 files.
+The data is sourced from the installed Europarl corpora, and includes ALL of it. This means
+the Italian development set has 11+ million words. We can reduce this amount if desired.
+
+To run the script:
+   $ cd src
+   $ ./generate_data.py
+   
+It will take ~10 minutes or so.
 
 ===
 
