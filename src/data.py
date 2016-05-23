@@ -2,6 +2,7 @@ import re
 import os
 from os import path
 import random
+from itertools import islice
 
 from nltk import tokenize
 
@@ -15,6 +16,12 @@ Languages = (
  ('it', 'italian'),
  ('es', 'spanish')
 )
+
+DataDir = os.path.join(
+ os.path.realpath(os.path.dirname(__file__)), "data")
+
+def getFilename(env, lang):
+   return os.path.join(DataDir, "%s-%s.txt" % (lang, env))
 
 def normalizeEuroparlText(text):
    """
@@ -31,17 +38,16 @@ def normalizeEuroparlText(text):
       <SPEAKER ID=5 NAME="El Presidente"> Señora Hardstaff, los servicios de
       traducción me informan de que realmente ha habido un problema técni
 
-   Let's try simply stripping anything inside angle brackets.
-
-   Further potential normalization:
-   - lower case
    """
+   # Eliminate anything inside angle brackets.
    output = re.sub('<.+>', '', text)
    # Terminate unterminated sentences followed by "\n\n", like "comenzar"
    # above.
    output = re.sub(r'\w$\n\n', '. ', output, flags=re.MULTILINE)
-   return output
-
+   # Finally, strip newlines.
+   output = re.sub(r'\n+', ' ', output, flags=re.MULTILINE)
+   # And lowercase everything.
+   return output.lower()
 
 def languageFragments(europarlLanguage, nltkLanguage):
    """
@@ -57,15 +63,19 @@ def languageFragments(europarlLanguage, nltkLanguage):
       yield from tokenize.sent_tokenize(
        normalizedText, language=nltkLanguage)
 
-def generateData(destinationDir):
+def generateData():
    """
    Take the available language data and randomly stripe it into separate files
    for training, development, testing, etc.
    """
+   # Set to None to use all fragments. This will allow us to tune in
+   # an appropriate dataset size.
+   fragmentLimit = 10000
+
    for europarlLang, nltkLang in Languages:
-      trainFilename = path.join(destinationDir, '%s-train.txt' % europarlLang)
-      devFilename = path.join(destinationDir, '%s-dev.txt' % europarlLang)
-      testFilename = path.join(destinationDir, '%s-test.txt' % europarlLang)
+      trainFilename = getFilename('train', europarlLang)
+      devFilename = getFilename('dev', europarlLang)
+      testFilename = getFilename('test', europarlLang)
 
       with open(trainFilename, 'w+', encoding=Encoding) as trainFile, \
        open(devFilename, 'w+', encoding=Encoding) as devFile, \
@@ -73,5 +83,8 @@ def generateData(destinationDir):
 
          files = (trainFile, devFile, testFile)
 
-         for fragment in languageFragments(europarlLang, nltkLang):
+         fragments = islice(
+          languageFragments(europarlLang, nltkLang), fragmentLimit)
+
+         for fragment in fragments:
             print(fragment, file=random.choice(files))

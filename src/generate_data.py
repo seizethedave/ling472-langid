@@ -1,13 +1,10 @@
 #!/usr/bin/env python3.4
 
-import sys
 import os
 
-from data import generateData
+from data import DataDir, generateData
 
-thisDir = os.path.realpath(os.path.dirname(__file__))
-dataDir = os.path.join(thisDir, "data")
-os.makedirs(dataDir, exist_ok=True)
-print("Generating all data to %s..." % dataDir)
-generateData(dataDir)
+os.makedirs(DataDir, exist_ok=True)
+print("Generating all data to %s..." % DataDir)
+generateData()
 print("Done.")

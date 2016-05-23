@@ -1,4 +1,2 @@
-
-
 def classify(text):
-   return 'French'
+   return 'fr'
