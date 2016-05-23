@@ -27,18 +27,18 @@ def evaluate(environment):
             controlResults.append(language)
             classifierResults.append(classify(fragment))
 
-         print("For language %s, accuracy is %f." % (
+         print("For language %s, accuracy is %.3f%%." % (
           language,
-          scores.accuracy(controlResults, classifierResults)
+          scores.accuracy(controlResults, classifierResults) * 100
           ))
 
       overallControlResults.extend(controlResults)
       overallClassifierResults.extend(classifierResults)
 
 
-   print("For overall environment %s, accuracy is %f." % (
+   print("For overall environment %s, accuracy is %.3f%%." % (
     environment,
-    scores.accuracy(overallControlResults, overallClassifierResults)
+    scores.accuracy(overallControlResults, overallClassifierResults) * 100
     ))
 
 if '__main__' == __name__:
