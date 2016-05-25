@@ -1,12 +1,11 @@
 import re
 import os
-from os import path
 import random
 from itertools import islice
 
 from nltk import tokenize
 
-Encoding = 'latin-1'
+Encoding = 'UTF-8'
 EuroparlRoot = '/corpora/europarl/txt'
 
 Languages = (
@@ -54,10 +53,10 @@ def languageFragments(europarlLanguage, nltkLanguage):
    Yields all fragments available for the specified language.
    Currently a fragment is a sentence, but this could be changed.
    """
-   location = path.join(EuroparlRoot, europarlLanguage)
+   location = os.path.join(EuroparlRoot, europarlLanguage)
 
    for scriptFile in os.listdir(location):
-      with open(path.join(location, scriptFile), encoding=Encoding) as f:
+      with open(os.path.join(location, scriptFile), encoding=Encoding) as f:
          normalizedText = normalizeEuroparlText(f.read())
 
       yield from tokenize.sent_tokenize(
@@ -77,9 +76,9 @@ def generateData():
       devFilename = getFilename('dev', europarlLang)
       testFilename = getFilename('test', europarlLang)
 
-      with open(trainFilename, 'w+', encoding=Encoding) as trainFile, \
-       open(devFilename, 'w+', encoding=Encoding) as devFile, \
-       open(testFilename, 'w+', encoding=Encoding) as testFile:
+      with open(trainFilename, 'w', encoding=Encoding) as trainFile, \
+       open(devFilename, 'w', encoding=Encoding) as devFile, \
+       open(testFilename, 'w', encoding=Encoding) as testFile:
 
          files = (trainFile, devFile, testFile)
 
