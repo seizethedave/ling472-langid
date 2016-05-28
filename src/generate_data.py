@@ -2,9 +2,13 @@
 
 import os
 
-from data import DataDir, generateData
+import data
 
-os.makedirs(DataDir, exist_ok=True)
-print("Generating all data to %s..." % DataDir)
-generateData()
+os.makedirs(data.DataDir, exist_ok=True)
+print("Generating training data to %s..." % data.DataDir)
+data.generateTrainingData()
+print("Done.")
+
+print("Generating classificaion data to %s..." % data.DataDir)
+data.generateClassificationData()
 print("Done.")
