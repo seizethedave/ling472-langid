@@ -123,7 +123,7 @@ def generateClassificationData():
          fragments = [next(fragmentIterator) for n in range(fragmentSize)]
 
          print(u"%s %d %s" %
-          (languageId, fragmentSize, " ".join(fragments)),
+          (languageId, fragmentSize, u" ".join(fragments)),
           file=random.choice(outputFiles))
       
          fragmentsGenerated += 1

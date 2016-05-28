@@ -2,22 +2,45 @@
 Utils for testing and evaluating.
 """
 
-from nltk.metrics import scores
-
 from classifier import classify
 from data import getClassificationFilename
 
 def evaluate(environment):
-   controlResults = []
-   classifierResults = []
+   """
+   Invoke classifier on all classification data for given environment,
+   reporting precision/recall figures for each language encountered.
+   """
+   langMetrics = {
+    'fr': [0, 0, 0],
+    'es': [0, 0, 0],
+    'it': [0, 0, 0],
+    'pt': [0, 0, 0],
+   }
+
+   # Indices for true positive, false positive, false negative figures.
+   (TP, FP, FN) = (0, 1, 2)
 
    with open(getClassificationFilename(environment), 'r') as f:
       for line in f:
          # Each line is <langid> <# sentences> <sentences>
          language, numSentences, fragment = line.split(" ", 2)
-         controlResults.append(language)
-         classifierResults.append(classify(fragment))
 
-      print("Accuracy is %.3f%%." % (
-       scores.accuracy(controlResults, classifierResults) * 100
-       ))
+         classifiedLanguage = classify(fragment)
+
+         # Track precision/recall stats.
+
+         if classifiedLanguage == language:
+            langMetrics[language][TP] += 1
+         else:
+            langMetrics[classifiedLanguage][FP] += 1
+            langMetrics[language][FN] += 1
+
+   for lang, (TP, FP, FN) in sorted(langMetrics.items()):
+      if TP + FP == 0 or TP + FN == 0:
+         print("Language '%s' no precision/recall data available." % lang)
+         continue
+
+      precision = TP / float(TP + FP)
+      recall = TP / float(TP + FN)
+      print("Language '%s': precision: %f, recall: %f" % (
+       lang, precision, recall))
