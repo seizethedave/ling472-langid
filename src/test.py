@@ -2,7 +2,8 @@
 Utils for testing and evaluating.
 """
 
-from classifier import classify
+import train
+from classifier import BigramClassifier, TandemClassifier
 from data import getClassificationFilename
 
 def evaluate(environment):
@@ -17,15 +18,34 @@ def evaluate(environment):
     'pt': [0, 0, 0],
    }
 
+   print("Training frequencies...")
+   freqDist = train.computeWordFrequencyDistributions()
+   print("Done.")
+
+   print("Training bigrams...")
+   bigramDist = train.computeLanguageBigramProbabilities()
+   print("Done.")
+
+   c = TandemClassifier(freqDist, bigramDist)
+   #bigramClassifier = BigramClassifier(distributions)
    # Indices for true positive, false positive, false negative figures.
    (TP, FP, FN) = (0, 1, 2)
 
+   limit = 200
+
    with open(getClassificationFilename(environment), 'r') as f:
       for line in f:
+         if limit > 0:
+            limit -= 1
+         else:
+            break
          # Each line is <langid> <# sentences> <sentences>
          language, numSentences, fragment = line.split(" ", 2)
 
-         classifiedLanguage = classify(fragment)
+         classifiedLanguage = c.classify(fragment)
+
+         print("Classified\n\t\"%s\"\n\t as %s." % (
+          fragment, classifiedLanguage))
 
          # Track precision/recall stats.
 

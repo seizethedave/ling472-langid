@@ -16,6 +16,8 @@ Languages = (
  ('es', 'spanish')
 )
 
+LanguageIds = tuple(langId for langId, langName in Languages)
+
 DataDir = os.path.join(
  os.path.realpath(os.path.dirname(__file__)), "data")
 
