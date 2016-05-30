@@ -3,7 +3,7 @@ Utils for testing and evaluating.
 """
 
 import train
-from classifier import BigramClassifier, TandemClassifier
+from classify import BigramClassifier, TandemClassifier
 from data import getClassificationFilename
 
 def evaluate(environment):
