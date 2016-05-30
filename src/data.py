@@ -8,6 +8,9 @@ from nltk import tokenize
 Encoding = 'UTF-8'
 EuroparlRoot = '/corpora/europarl/txt'
 
+TrainingSentenceLimit = 1000
+ClassificationFragmentLimit = 1000
+
 Languages = (
  # 2-tuples: (language ID, language name)
  # Conveniently, Europarl stores data by the first one; NLTK identifies
@@ -72,8 +75,6 @@ def languageFragments(europarlLanguage, nltkLanguage):
 def generateAllData():
    os.makedirs(DataDir, exist_ok=True)
 
-   trainingSentenceLimit = 10000
-
    languageSentenceIterators = {
     langId: iter(languageFragments(langId, langName))
     for langId, langName in Languages
@@ -82,7 +83,7 @@ def generateAllData():
    print("Generating training data to %s..." % DataDir)
 
    generateTrainingData({
-    langId: islice(it, trainingSentenceLimit)
+    langId: islice(it, TrainingSentenceLimit)
     for langId, it in languageSentenceIterators.items()
    })
 
@@ -121,7 +122,6 @@ def generateClassificationData(languageSentenceIterators):
    input lengths.
    """
    sentenceLimits = (1, 20)
-   fragmentLimit = 10000
 
    devFilename = getClassificationFilename("dev")
    testFilename = getClassificationFilename("test")
@@ -130,7 +130,7 @@ def generateClassificationData(languageSentenceIterators):
          open(testFilename, "w", encoding=Encoding) as testFile:
       outputFiles = (devFile, testFile)
 
-      for i in range(fragmentLimit):
+      for i in range(ClassificationFragmentLimit):
          fragmentSize = random.randint(*sentenceLimits)
 
          # Randomly choose a language, pull a fragment of the desired size.
