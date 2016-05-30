@@ -9,7 +9,9 @@ Encoding = 'UTF-8'
 EuroparlRoot = '/corpora/europarl/txt'
 
 Languages = (
- # 2-tuples: (Europarl folder, nltk language)
+ # 2-tuples: (language ID, language name)
+ # Conveniently, Europarl stores data by the first one; NLTK identifies
+ # language by the second.
  ('fr', 'french'),
  ('pt', 'portuguese'),
  ('it', 'italian'),
@@ -58,31 +60,50 @@ def languageFragments(europarlLanguage, nltkLanguage):
    Yields all fragments available for the specified language.
    Currently a fragment is a sentence, but this could be changed.
    """
-   location = os.path.join(EuroparlRoot, europarlLanguage)
+   langFolder = os.path.join(EuroparlRoot, europarlLanguage)
 
-   for scriptFile in os.listdir(location):
-      with open(os.path.join(location, scriptFile), encoding=Encoding) as f:
+   for scriptFile in os.listdir(langFolder):
+      with open(os.path.join(langFolder, scriptFile), encoding=Encoding) as f:
          normalizedText = normalizeEuroparlText(f.read())
 
       yield from tokenize.sent_tokenize(
        normalizedText, language=nltkLanguage)
 
-def generateTrainingData():
-   #  This will allow us to tune in an appropriate training dataset size. (Set
-   #  to None to use all fragments.)
-   fragmentLimit = 15000
+def generateAllData():
+   os.makedirs(DataDir, exist_ok=True)
 
-   for europarlLang, nltkLang in Languages:
-      trainFilename = getFilename('train', europarlLang)
+   trainingSentenceLimit = 10000
+
+   languageSentenceIterators = {
+    langId: iter(languageFragments(langId, langName))
+    for langId, langName in Languages
+   }
+
+   print("Generating training data to %s..." % DataDir)
+
+   generateTrainingData({
+    langId: islice(it, trainingSentenceLimit)
+    for langId, it in languageSentenceIterators.items()
+   })
+
+   print("Done.")
+
+   print("Generating classification data to %s..." % DataDir)
+
+   # Give the rest of the data to the classification data generator.
+   generateClassificationData(languageSentenceIterators)
+
+   print("Done.")
+
+def generateTrainingData(languageSentenceIterators):
+   for langId, iterator in languageSentenceIterators.items():
+      trainFilename = getFilename('train', langId)
 
       with open(trainFilename, 'w', encoding=Encoding) as trainFile:
-         fragments = islice(
-          languageFragments(europarlLang, nltkLang), fragmentLimit)
+         for sentence in iterator:
+            print(sentence, file=trainFile)
 
-         for fragment in fragments:
-            print(fragment, file=trainFile)
-
-def generateClassificationData():
+def generateClassificationData(languageSentenceIterators):
    """
    We generate all environments' classification sample data here.
    Each line in the resulting file will be formatted as
@@ -99,9 +120,8 @@ def generateClassificationData():
    Each line represents one sample input. We generate a variety of
    input lengths.
    """
-   environments = ('dev', 'test')
-   fragmentLimit = 10000
    sentenceLimits = (1, 20)
+   fragmentLimit = 10000
 
    devFilename = getClassificationFilename("dev")
    testFilename = getClassificationFilename("test")
@@ -110,22 +130,15 @@ def generateClassificationData():
          open(testFilename, "w", encoding=Encoding) as testFile:
       outputFiles = (devFile, testFile)
 
-      fragmentIterators = [
-       (iter(languageFragments(languageId, nltkFolder)), languageId)
-       for (languageId, nltkFolder) in Languages
-      ]
-
-      fragmentsGenerated = 0
-
-      while fragmentsGenerated < fragmentLimit:
+      for i in range(fragmentLimit):
          fragmentSize = random.randint(*sentenceLimits)
 
          # Randomly choose a language, pull a fragment of the desired size.
-         (fragmentIterator, languageId) = random.choice(fragmentIterators)
-         fragments = [next(fragmentIterator) for n in range(fragmentSize)]
+
+         languageId = random.choice(LanguageIds)
+         iterator = languageSentenceIterators[languageId]
+         fragments = [next(iterator) for n in range(fragmentSize)]
 
          print(u"%s %d %s" %
           (languageId, fragmentSize, u" ".join(fragments)),
           file=random.choice(outputFiles))
-      
-         fragmentsGenerated += 1
