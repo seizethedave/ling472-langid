@@ -2,6 +2,8 @@
 Utils for testing and evaluating.
 """
 
+from nltk.metrics.confusionmatrix import ConfusionMatrix
+
 import train
 from classify import BigramClassifier, TandemClassifier
 from data import getClassificationFilename
@@ -31,23 +33,20 @@ def evaluate(environment):
    # Indices for true positive, false positive, false negative figures.
    (TP, FP, FN) = (0, 1, 2)
 
-   limit = 200
+   # Track these for confusion matrix calculation.
+   gold = []
+   results = []
 
    with open(getClassificationFilename(environment), 'r') as f:
       for line in f:
-         if limit > 0:
-            limit -= 1
-         else:
-            break
          # Each line is <langid> <# sentences> <sentences>
          language, numSentences, fragment = line.split(" ", 2)
 
          classifiedLanguage = c.classify(fragment)
 
-         print("Classified\n\t\"%s\"\n\t as %s." % (
-          fragment, classifiedLanguage))
-
          # Track precision/recall stats.
+         gold.append(language)
+         results.append(classifiedLanguage)
 
          if classifiedLanguage == language:
             langMetrics[language][TP] += 1
@@ -64,3 +63,8 @@ def evaluate(environment):
       recall = TP / float(TP + FN)
       print("Language '%s': precision: %f, recall: %f" % (
        lang, precision, recall))
+
+
+   print("")
+   confusion = ConfusionMatrix(gold, results)
+   print(confusion.pretty_format(sort_by_count=True))
