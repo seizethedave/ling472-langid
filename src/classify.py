@@ -27,36 +27,21 @@ class TandemClassifier(object):
       for lang in freqScores.keys():
          results[lang] = freqScores[lang] + bigramScores[lang]
 
-      """
-      print("Freq scores: %r" % (freqScores))
-      print("Bigram scores: %r" % (bigramScores))
-      print("Overall scores: %r" % (results))
-      """
-
       return results
-      
 
 class FrequencyClassifier(object):
    def __init__(self, distributions):
       self.distributions = distributions
+      self.tokenizer = nltk.RegexpTokenizer(r'\w+')
 
    def classify(self, text):
-      tokenizer = nltk.RegexpTokenizer(r'\w+')
-      words = tokenizer.tokenize(text)
+      words = self.tokenizer.tokenize(text)
 
       bestLang = ''
       bestScore = -713047205702707
 
       for lang, distribution in self.distributions.items():
-         hapaxProb = distribution.logprob(
-          distribution.freqdist().hapaxes()[0])
-         langScore = 0
-
-         for word in words:
-            if word in distribution.freqdist():
-               langScore += distribution.logprob(word)
-            else:
-               langScore += hapaxProb
+         langScore = sum(distribution.logprob(word) for word in words)
 
          if langScore > bestScore:
             bestScore = langScore
@@ -65,22 +50,12 @@ class FrequencyClassifier(object):
       return bestLang
 
    def classify2(self, text):
-      tokenizer = nltk.RegexpTokenizer(r'\w+')
-      words = tokenizer.tokenize(text)
+      words = self.tokenizer.tokenize(text)
 
       results = { }
 
       for lang, distribution in self.distributions.items():
-         hapaxProb = distribution.logprob(
-          distribution.freqdist().hapaxes()[0])
-         langScore = 0
-
-         for word in words:
-            if word in distribution.freqdist():
-               langScore += distribution.logprob(word)
-            else:
-               langScore += hapaxProb
-
+         langScore = sum(distribution.logprob(word) for word in words)
          results[lang] = langScore
 
       return results

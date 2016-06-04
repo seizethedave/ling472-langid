@@ -2,6 +2,8 @@ import nltk
 
 import data
 
+BinSize = 1e8
+
 def computeLanguageBigramProbabilities():
    distributionDict = {}
 
@@ -12,7 +14,7 @@ def computeLanguageBigramProbabilities():
          bigrams = nltk.bigrams(trainFile.read())
 
       dist = nltk.FreqDist(bigrams)
-      goodTuring = nltk.SimpleGoodTuringProbDist(dist)
+      goodTuring = nltk.SimpleGoodTuringProbDist(dist, bins=BinSize)
       distributionDict[lang] = goodTuring
 
    return distributionDict
@@ -29,7 +31,7 @@ def computeWordFrequencyDistributions():
          words = tokenizer.tokenize(trainFile.read())
 
       dist = nltk.FreqDist(words)
-      goodTuring = nltk.SimpleGoodTuringProbDist(dist)
+      goodTuring = nltk.SimpleGoodTuringProbDist(dist, bins=BinSize)
       distributionDict[lang] = goodTuring
 
    return distributionDict

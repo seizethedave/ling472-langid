@@ -33,7 +33,7 @@ def evaluate(environment):
    # Indices for true positive, false positive, false negative figures.
    (TP, FP, FN) = (0, 1, 2)
 
-   # Track these for confusion matrix calculation.
+   # Track these for confusion matrix.
    gold = []
    results = []
 
@@ -55,15 +55,13 @@ def evaluate(environment):
             langMetrics[language][FN] += 1
 
    for lang, (TP, FP, FN) in sorted(langMetrics.items()):
-      if TP + FP == 0 or TP + FN == 0:
+      try:
+         precision = TP / float(TP + FP)
+         recall = TP / float(TP + FN)
+         print("Language '%s': precision: %f, recall: %f" % (
+          lang, precision, recall))
+      except ZeroDivisionError:
          print("Language '%s' no precision/recall data available." % lang)
-         continue
-
-      precision = TP / float(TP + FP)
-      recall = TP / float(TP + FN)
-      print("Language '%s': precision: %f, recall: %f" % (
-       lang, precision, recall))
-
 
    print("")
    confusion = ConfusionMatrix(gold, results)
