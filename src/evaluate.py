@@ -8,10 +8,13 @@ from test import evaluate
 
 if 1 == len(sys.argv):
    print("Execute with:")
-   print("   ./evaluate.py foo")
+   print("   ./evaluate.py foo [classifier]")
    print(
-    "   (where foo indicates a file in data/ with name classify-foo.txt.)")
+    "   (where foo indicates a classify-foo.txt file in data/,")
+   print(
+    "   and classifier is one of base|tandem|bigram|frequency .)")
    sys.exit(1)
 
 env = sys.argv[1]
-evaluate(env)
+classifier = sys.argv[2] if len(sys.argv) >= 3 else "tandem"
+evaluate(env, classifier)
