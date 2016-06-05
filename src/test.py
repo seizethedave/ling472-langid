@@ -48,6 +48,9 @@ def evaluate(environment):
          gold.append(language)
          results.append(classifiedLanguage)
 
+         if language not in langMetrics:
+            langMetrics[language] = [0, 0, 0]
+
          if classifiedLanguage == language:
             langMetrics[language][TP] += 1
          else:
@@ -64,5 +67,5 @@ def evaluate(environment):
          print("Language '%s' no precision/recall data available." % lang)
 
    print("")
-   confusion = ConfusionMatrix(gold, results)
-   print(confusion.pretty_format(sort_by_count=True))
+   matrix = ConfusionMatrix(gold, results)
+   print(matrix.pretty_format())
