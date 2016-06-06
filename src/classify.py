@@ -1,12 +1,14 @@
 import operator
 import itertools
-from statistics import stdev
 
 import nltk
 
 Unknown = "*UNK*"
 
 class BaseClassifier:
+   """
+   A very dumb classifier that thinks everything is French.
+   """
    def classify(self, text):
       return 'fr'
 
@@ -34,12 +36,12 @@ class TandemClassifier:
       return results
 
 class ReluctantTandemClassifier(TandemClassifier):
-   ReluctanceThreshold = 0.9850
-
    """
    Specialized TandemClassifier that will produce `Unknown` when not confident
    about the result.
    """
+   ReluctanceThreshold = 0.925
+
    def classify(self, text):
       probs = super().classify2(text)
 
@@ -55,6 +57,9 @@ class ReluctantTandemClassifier(TandemClassifier):
       return max(probs.items(), key=operator.itemgetter(1))[0]
 
 class FrequencyClassifier:
+   """
+   Uses trained word frequency information to classify a piece of text.
+   """
    def __init__(self, distributions):
       self.distributions = distributions
       self.tokenizer = nltk.RegexpTokenizer(r'\w+')
@@ -85,6 +90,9 @@ class FrequencyClassifier:
       return results
 
 class BigramClassifier:
+   """
+   Uses character bigram frequency information to classify a piece of text.
+   """
    def __init__(self, distributions):
       self.distributions = distributions
 
