@@ -20,6 +20,15 @@ def getClassifier(classifier):
       bigramDist = train.computeLanguageBigramProbabilities()
       print("Done.")
       return classify.TandemClassifier(freqDist, bigramDist)
+   elif 'reluctant-tandem' == classifier:
+      print("Training frequencies...")
+      freqDist = train.computeWordFrequencyDistributions()
+      print("Done.")
+
+      print("Training bigrams...")
+      bigramDist = train.computeLanguageBigramProbabilities()
+      print("Done.")
+      return classify.ReluctantTandemClassifier(freqDist, bigramDist)
    elif 'frequency' == classifier:
       print("Training frequencies...")
       freqDist = train.computeWordFrequencyDistributions()
@@ -63,18 +72,22 @@ def evaluate(environment, classifierName):
          classifiedLanguage = classifier.classify(fragment)
 
          # Track precision/recall stats.
-         gold.append(language)
-         results.append(classifiedLanguage)
 
+         # For exotic langs not otherwise accounted for...
          if language not in langMetrics:
-            # For exotic langs not otherwise accounted for...
             langMetrics[language] = [0, 0, 0]
+         if classifiedLanguage not in langMetrics:
+            langMetrics[classifiedLanguage] = [0, 0, 0]
 
          if classifiedLanguage == language:
             langMetrics[language][TP] += 1
          else:
             langMetrics[classifiedLanguage][FP] += 1
             langMetrics[language][FN] += 1
+
+         # And for the confusion matrix:
+         gold.append(language)
+         results.append(classifiedLanguage)
 
    for lang, (TP, FP, FN) in sorted(langMetrics.items()):
       try:
@@ -83,7 +96,7 @@ def evaluate(environment, classifierName):
          print("Language '%s': precision: %f, recall: %f" % (
           lang, precision, recall))
       except ZeroDivisionError:
-         print("Language '%s' no precision/recall data available." % lang)
+         print("Language '%s': N/A." % lang)
 
    print("")
    matrix = ConfusionMatrix(gold, results)

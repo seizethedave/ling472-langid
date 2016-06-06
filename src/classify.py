@@ -1,12 +1,16 @@
 import operator
+from statistics import stdev
 
 import nltk
+
+Unknown = "*UNK*"
+ConfidenceBoundary = 100.0
 
 class BaseClassifier:
    def classify(self, text):
       return 'fr'
 
-class TandemClassifier(object):
+class TandemClassifier:
    def __init__(self, freqDistributions, bigramDistributions):
       self.freqClassifier = FrequencyClassifier(freqDistributions)
       self.bigramClassifier = BigramClassifier(bigramDistributions)
@@ -25,14 +29,29 @@ class TandemClassifier(object):
 
       return results
 
-class FrequencyClassifier(object):
+class ReluctantTandemClassifier(TandemClassifier):
+   """
+   Specialized TandemClassifier that will produce `Unknown` when not confident
+   about the result.
+   """
+   def classify(self, text):
+      probs = super().classify2(text)
+      probNumbers = probs.values()
+      
+      confidence = (max(probNumbers) - min(probNumbers)) * stdev(probNumbers)
+
+      if confidence < ConfidenceBoundary:
+         return Unknown
+
+      return max(probs.items(), key=operator.itemgetter(1))[0]
+
+class FrequencyClassifier:
    def __init__(self, distributions):
       self.distributions = distributions
       self.tokenizer = nltk.RegexpTokenizer(r'\w+')
 
    def classify(self, text):
       words = self.tokenizer.tokenize(text)
-
       bestLang = ''
       bestScore = -713047205702707
 
@@ -56,7 +75,7 @@ class FrequencyClassifier(object):
 
       return results
 
-class BigramClassifier(object):
+class BigramClassifier:
    def __init__(self, distributions):
       self.distributions = distributions
 
