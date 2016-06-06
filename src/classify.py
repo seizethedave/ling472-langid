@@ -1,16 +1,20 @@
 import operator
+import itertools
 from statistics import stdev
 
 import nltk
 
 Unknown = "*UNK*"
-ConfidenceBoundary = 100.0
 
 class BaseClassifier:
    def classify(self, text):
       return 'fr'
 
 class TandemClassifier:
+   """
+   A classifier that combines the results of `BigramClassifier` and
+   `FrequencyClassifier`.
+   """
    def __init__(self, freqDistributions, bigramDistributions):
       self.freqClassifier = FrequencyClassifier(freqDistributions)
       self.bigramClassifier = BigramClassifier(bigramDistributions)
@@ -30,17 +34,22 @@ class TandemClassifier:
       return results
 
 class ReluctantTandemClassifier(TandemClassifier):
+   ReluctanceThreshold = 0.9850
+
    """
    Specialized TandemClassifier that will produce `Unknown` when not confident
    about the result.
    """
    def classify(self, text):
       probs = super().classify2(text)
-      probNumbers = probs.values()
-      
-      confidence = (max(probNumbers) - min(probNumbers)) * stdev(probNumbers)
 
-      if confidence < ConfidenceBoundary:
+      # Look at the two winning-est candidates. If they're too close together,
+      # we consider it to be too close to call.
+      winner, runnerUp = itertools.islice(
+       sorted(probs.values(), reverse=True), 2)
+
+      if runnerUp != 0 and (winner / runnerUp) > self.ReluctanceThreshold:
+         # Too close to call.
          return Unknown
 
       return max(probs.items(), key=operator.itemgetter(1))[0]
