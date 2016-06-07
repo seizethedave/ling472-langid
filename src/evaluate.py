@@ -10,9 +10,10 @@ if 1 == len(sys.argv):
    print("Execute with:")
    print("   ./evaluate.py foo [classifier]")
    print(
-    "   (where foo indicates a classify-foo.txt file in data/,")
+    "Where foo indicates a classify-foo.txt file in data/,")
    print(
-    "   and classifier is one of base|tandem|bigram|frequency .)")
+    "and classifier is one of "
+    "base|tandem|reluctant-tandem|bigram|frequency.)")
    sys.exit(1)
 
 env = sys.argv[1]
