@@ -9,7 +9,7 @@ import classify
 from data import getClassificationFilename
 
 def getClassifier(classifier):
-   if 'base' == classifier:
+   if 'baseline' == classifier:
       return classify.BaseClassifier()
    elif 'tandem' == classifier:
       print("Training frequencies...")
@@ -39,6 +39,8 @@ def getClassifier(classifier):
       bigramDist = train.computeLanguageBigramProbabilities()
       print("Done.")
       return classify.BigramClassifier(bigramDist)
+
+   raise ValueError("Invalid classifier '%s'." % classifier)
 
 def evaluate(environment, classifierName):
    """

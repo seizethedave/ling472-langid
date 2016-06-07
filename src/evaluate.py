@@ -13,7 +13,7 @@ if 1 == len(sys.argv):
     "Where foo indicates a classify-foo.txt file in data/,")
    print(
     "and classifier is one of "
-    "base|tandem|reluctant-tandem|bigram|frequency.)")
+    "baseline|tandem|reluctant-tandem|bigram|frequency.)")
    sys.exit(1)
 
 env = sys.argv[1]
